@@ -15,17 +15,11 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-const (
-	SecSkillQueue = "seckill"
-)
-
-var secKillRabbitmq = RabbitMQ.NewRabbitMQSimple(SecSkillQueue)
-
 //products
 func Products(c *gin.Context) {
 	var productList []models.Product
 	val, err := cache.Rdb.Get("products").Result()
-	if err != nil {
+	if err != nil || len(productList) <= 0 {
 		productList, err = models.ListProducts()
 		log.Println("List product Test Success.")
 		productJson, _ := json.Marshal(productList)
@@ -66,24 +60,32 @@ func SecKillProduct(c *gin.Context) {
 	}
 
 	productId := c.Param("productId")
+	log.Println("pid:", productId)
 	id, err := strconv.Atoi(productId)
 	var currProduct models.Product
+
 	for _, product := range productList {
+		log.Println(product)
 		if product.ProductID == id {
 			currProduct = product
 		}
 	}
 
+	log.Println("name: ", currProduct.ProductName)
+	log.Println("number: ", currProduct.ProductNumber)
 	if currProduct.ProductNumber <= 0 {
 		e := errors.New(-1, "商品已经卖完")
 		dto.APIResponse(c, e, "商品已经卖完")
+		return
 	}
-	secKillRabbitmq.PublishSimple(request_id.String())
+	RabbitMQ.SecKillRabbitmq.PublishSimple(request_id.String())
 	dto.APIResponse(c, err, request_id.String()+"正在排队中")
+	cache.Rdb.Set("status/"+request_id.String(), "1", time.Hour)
+	return
 }
 
 // 秒杀后进行支付
-func payForProduct(c *gin.Context) {
+func PayForProduct(c *gin.Context) {
 	var productList []models.Product
 	val, err := cache.Rdb.Get("products").Result()
 	if err != nil {

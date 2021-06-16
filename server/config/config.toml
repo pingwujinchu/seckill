@@ -13,4 +13,4 @@ Addr = "redis:6379"
 Password = ""
 
 [rabbitmq]
-Mqurl = "amqp://goshop:123456@:15672/shop"
+Mqurl = "amqp://goshop:123456@rabbitmq:5672"

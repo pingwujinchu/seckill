@@ -1,13 +1,15 @@
 version: '2.1'
 services:
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq
     restart: always
     environment:
       RABBITMQ_DEFAULT_USER: goshop
       RABBITMQ_DEFAULT_PASS: 123456
-    ports:
-      - 15672:15672
+    command: rabbitmq-server
+    expose:
+      - 15672
+      - 5672
     logging:
       options:
         max-size: "10m"

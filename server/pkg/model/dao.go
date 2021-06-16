@@ -70,6 +70,11 @@ func mysqlDatabase(dbConfig config.DatabaseConfig) {
 
 	//3 Migration db
 	migration()
+	produt := Product{
+		ProductName:   "小米11",
+		ProductNumber: 50,
+	}
+	Database.Table(ProductTableName).Save(&produt)
 }
 
 func migration() {

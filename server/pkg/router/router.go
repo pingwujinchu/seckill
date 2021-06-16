@@ -47,6 +47,9 @@ func registerProductAPI(server *Server) {
 	engineGroup := server.Engine.Group("/")
 	//add CAS Auth middleware
 	//engineGroup.Use(casClient.Authorize())
+	engineGroup.Use(gin.BasicAuth(gin.Accounts{
+		"server": "love",
+	}))
 	engineGroup.GET("/product", api.Products)
 	engineGroup.GET("/seckills", api.Seckills)
 	engineGroup.GET("/orders", api.Orders)

@@ -50,6 +50,9 @@ server 由go语言实现
 # 构建
 构建之前需要安装docker
 执行build.sh
+```
+sudo ./build.sh
+```
 
 # 运行
 docker-compose up

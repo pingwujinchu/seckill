@@ -4,18 +4,28 @@ import (
 	"fmt"
 	"log"
 	"server/pkg/config"
+	models "server/pkg/model"
 
 	"github.com/streadway/amqp"
 )
 
 // MQURL 格式 amqp://账号：密码@rabbitmq服务器地址：端口号/vhost
 // var MQURL string
-const MQURL:= "amqp://goshop:123456@:15672/shop"
+// var MQURL string
+var MQURL string
+
+const (
+	SecSkillQueue = "seckill"
+)
+
+var SecKillRabbitmq *RabbitMQ
 
 func InitRabbitMQ() {
 	con := config.GetRabbitMQConfig()
-	println(con)
 	MQURL = con.Mqurl
+	println(con)
+	SecKillRabbitmq = NewRabbitMQSimple(SecSkillQueue)
+	// MQURL = "amqp://goshop:123456@rabbitmq:15672/shop"
 }
 
 type RabbitMQ struct {
@@ -151,7 +161,7 @@ func (r *RabbitMQ) ConsumeSimple() {
 	// 启用协和处理消息
 	go func() {
 		for d := range msgs {
-			// 实现我们要实现的逻辑函数
+			models.SolveSecKill(string(d.Body), 1)
 			log.Printf("Received a message: %s", d.Body)
 			fmt.Println(d.Body)
 		}

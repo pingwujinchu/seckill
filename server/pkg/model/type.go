@@ -1,6 +1,9 @@
 package models
 
 import (
+	"encoding/json"
+	"log"
+	"server/pkg/cache"
 	"time"
 
 	"gorm.io/gorm"
@@ -23,6 +26,7 @@ type Order struct {
 	gorm.Model
 	OrderID   int       `gorm:"int:varchar(30);not null;comment:'orderid'"`
 	OrderTime time.Time `json:"order_time" gorm:"column:order_time"`
+	RequestID string
 	Payment   bool
 	Product   Product `json:",omitempty" gorm:"foreignKey:ProductID"`
 }
@@ -51,4 +55,41 @@ func ListOrder() ([]Order, error) {
 	var orderList []Order
 	res := Database.Table(OrderTableName).Where("deleted_at is null ").Find(&orderList)
 	return orderList, res.Error
+}
+
+//使用事务操作，先减少库存，然后再更新缓存
+func SolveSecKill(requestID string, ProductID int) {
+	tx := Database.Begin()
+	var product Product
+	tx.Where("ProductID=" + string(ProductID)).First(&product)
+	if product.ProductNumber > 0 {
+		product.ProductNumber = product.ProductNumber - 1
+	}
+	tx.Save(product)
+	order := Order{
+		OrderTime: time.Now(),
+		RequestID: requestID,
+		Product:   product,
+	}
+	tx.Save(order)
+
+	var productList []Product
+	val, err := cache.Rdb.Get("products").Result()
+	if err != nil {
+		productList, err = ListProducts()
+		log.Println("List product Test Success.")
+		productJson, _ := json.Marshal(productList)
+		cache.Rdb.Set("products", productJson, time.Hour)
+	} else {
+		json.Unmarshal([]byte(val), &productList)
+		for _, p := range productList {
+			if p.ProductID == ProductID {
+				p.ProductNumber = p.ProductNumber - 1
+			}
+		}
+		productJson, _ := json.Marshal(productList)
+		cache.Rdb.Set("products", productJson, time.Hour)
+	}
+
+	tx.Commit()
 }
