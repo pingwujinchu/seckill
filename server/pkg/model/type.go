@@ -71,6 +71,9 @@ func SolveSecKill(requestID string, ProductID int) {
 
 	if product.ProductNumber > 0 {
 		product.ProductNumber = product.ProductNumber - 1
+	} else {
+		cache.Rdb.Set("status/"+requestID, "-1", time.Hour)
+		return
 	}
 
 	log.Println(product.ProductNumber)
