@@ -1,6 +1,7 @@
 # seckill
 该项目使用bazel进行打包管理
 # 项目目录
+```sh
 ├── [  67]  build.sh
 ├── [4.0K]  cache
 │   ├── [ 14K]  cache
@@ -37,6 +38,7 @@
 │   ├── [ 165]  BUILD
 │   └── [ 18K]  cmdline.h
 └── [ 592]  WORKSPACE
+```
 
 # client
 client由c++实现
