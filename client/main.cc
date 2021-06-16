@@ -9,6 +9,7 @@
 #include <string>
 #include <cstring>
 #include <memory>
+#include <cstdlib>
 #include "../tools/cmdline.h"
 #include "../client/HttpGetPostMethod.h"
 
@@ -33,6 +34,8 @@ int main(int argc, char *argv[])
     a.add<int>("port", 'p', "port number", false, 9988, cmdline::range(1, 65535));
     // cmdline::oneof() 可以用来限制参数的可选值
     a.add<string>("type", 't', "protocol type", false, "http", cmdline::oneof<string>("http", "https", "ssh", "ftp"));
+
+    a.add<string>("arg", 'a', "参数", false, "");
     // 也可以定义bool值
     // 通过调用不带类型的add方法
     a.add("gzip", '\0', "gzip when transfer");
@@ -43,21 +46,17 @@ int main(int argc, char *argv[])
     a.parse_check(argc, argv);
     // 获取输入的参数值
     cout << a.get<string>("type") << "://"
-         << a.get<string>("host") << ":"
-         << a.get<int>("port") << endl;
+         << a.get<string>("host") << ":";
     // bool值可以通过调用exsit()方法来判断
-    
-    string auth = "Basic c2VydmVyOmxvdmU=";
     string host = a.get<string>("host");
-    cout << host <<endl;
-    string port = "" + a.get<int>("port");
+    string port = std::to_string(a.get<int>("port"));
+    cout << port << endl;
     string service = a.get<string>("service");
-    shared_ptr<HttpGetPostMethod> http_request = make_shared<HttpGetPostMethod>();
-    int ret  = http_request->HttpGetWithAuth(host, port, service, "showapi_appid=52875&showapi_sign=59c54e39583740bf9708c645c389c9ec&fundCode=519185&needDetails=1", auth);
-    if(ret == -1) {
-        cout << "Http Socket error!" << endl;
+
+    string cmd = "curl --user server:love " + host + ":" + port + "/" + service + "/" + a.get<string>("arg");
+
+    if (service.compare("seckill") == 0) {
+        cmd = cmd + "-X POST";
     }
-    cout << ret << endl;
-    if (a.exist("gzip"))
-        cout << "gzip" << endl;
+    system((char *)cmd.data());
 }

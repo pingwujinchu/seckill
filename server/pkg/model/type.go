@@ -90,6 +90,6 @@ func SolveSecKill(requestID string, ProductID int) {
 		productJson, _ := json.Marshal(productList)
 		cache.Rdb.Set("products", productJson, time.Hour)
 	}
-
+	cache.Rdb.Set("status/"+requestID, "2", time.Hour)
 	tx.Commit()
 }
