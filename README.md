@@ -68,9 +68,30 @@ docker-compose up
 ```
 其中-n 指的是并行数
 
+查看当前状态
+```
+./client -s status -a xxxxxx 
+```
+
+# 数据库设计
+
+```
++-----------------------+
+| Tables_in_sec_kill_db |
++-----------------------+
+| orders                |
+| products              |
+| sec_kills             |
++-----------------------+
+```
+
 # 问题排查
 如果遇到无法连接数据库，是没有创建数据库，需要创建一下数据库，命令如下：
 ```
+docker exec -it  XXX sh 
 
+mysql -u root -p jdllq@cclfc
+
+create database sec_kill_db
 ```
 
