@@ -1,0 +1,16 @@
+[database]
+Addr = "mysql:3306"
+DB = "sec_skill_db"
+Driver = "mysql"
+UserName = "root"
+Password = "jdllq@cclfc"
+MaxIdelConn = 10
+MaxOpenConn = 256
+ConnMaxLifetime = 600
+
+[redis]
+Addr = "redis:6379"
+Password = ""
+
+[rabbitmq]
+Mqurl = "amqp://goshop:123456@:15672/shop"

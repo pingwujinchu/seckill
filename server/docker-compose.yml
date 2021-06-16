@@ -1,0 +1,54 @@
+version: '2.1'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: goshop
+      RABBITMQ_DEFAULT_PASS: 123456
+    ports:
+      - 15672:15672
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  server:
+    image: sec-kill-server:dev
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - 9988:8080
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+    
+  redis:
+    image: redis
+    restart: always
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  mysql:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: jdllq@cclfc
+      MYSQL_DATABASE: sec_skill_db
+      MYSQL_USER: root
+    # command: mysql -uroot -pjdllq@cclfc < /config/init.sql  && top
+    volumes:
+    - ./config:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:  mysql --user=root --password=jdllq@cclfc -e 'SHOW DATABASES;'
+      timeout: 20s
+      retries: 10
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"

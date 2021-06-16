@@ -1,0 +1,1 @@
+create database sec_skill_db;

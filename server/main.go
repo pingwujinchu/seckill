@@ -1,11 +1,20 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"log"
+	"server/pkg/cache"
+	models "server/pkg/model"
+	RabbitMQ "server/pkg/rabitmq"
+	routers "server/pkg/router"
+)
 
 func main() {
-	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
-		c.String(200, "Hello, Geektutu")
-	})
-	r.Run() // listen and serve on 0.0.0.0:8080
+	models.Init()
+	cache.InitClient()
+	RabbitMQ.InitRabbitMQ()
+	server := routers.InitRouter()
+	err := server.Engine.Run(":8080")
+	if err != nil {
+		log.Fatal("start failed")
+	}
 }
