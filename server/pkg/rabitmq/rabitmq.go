@@ -163,8 +163,10 @@ func (r *RabbitMQ) ConsumeSimple() {
 	go func() {
 		for d := range msgs {
 			var message models.Message
+			log.Println(string(d.Body))
 			json.Unmarshal(d.Body, &message)
-			log.Panicln("consume message: ", message)
+			log.Println(message.RequestID)
+			log.Println(message.ProductID)
 			models.SolveSecKill(message.RequestID, message.ProductID)
 			log.Printf("Received a message: %s", d.Body)
 			fmt.Println(d.Body)

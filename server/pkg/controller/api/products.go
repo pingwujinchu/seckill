@@ -19,7 +19,7 @@ import (
 func Products(c *gin.Context) {
 	var productList []models.Product
 	val, err := cache.Rdb.Get("products").Result()
-	if err != nil || len(productList) <= 0 {
+	if err != nil {
 		productList, err = models.ListProducts()
 		log.Println("List product Test Success.")
 		productJson, _ := json.Marshal(productList)
@@ -33,8 +33,16 @@ func Products(c *gin.Context) {
 
 //seckills
 func Seckills(c *gin.Context) {
-	secKillList, err := models.ListSecKillJob()
-	log.Println("List seckills Test Success.")
+	var secKillList []models.SecKill
+	val, err := cache.Rdb.Get("seckills").Result()
+	if err != nil {
+		secKillList, err = models.ListSecKillJob()
+		log.Println("List seckills Test Success.")
+		seckillJson, _ := json.Marshal(secKillList)
+		cache.Rdb.Set("seckills", seckillJson, time.Hour)
+	} else {
+		json.Unmarshal([]byte(val), &secKillList)
+	}
 	dto.APIResponse(c, err, secKillList)
 }
 
@@ -64,9 +72,25 @@ func SecKillProduct(c *gin.Context) {
 	id, err := strconv.Atoi(productId)
 	var currProduct models.Product
 
+	var secKillList []models.SecKill
+	val, err = cache.Rdb.Get("seckills").Result()
+	if err != nil {
+		secKillList, err = models.ListSecKillJob()
+		log.Println("List seckills Test Success.")
+		seckillJson, _ := json.Marshal(secKillList)
+		cache.Rdb.Set("seckills", seckillJson, time.Hour)
+	} else {
+		json.Unmarshal([]byte(val), &secKillList)
+	}
+
+	if !checkTime(id, secKillList) {
+		dto.APIResponse(c, nil, "不在秒杀时间内")
+		return
+	}
+
 	for _, product := range productList {
 		log.Println(product)
-		if product.ProductID == id {
+		if int(product.ID) == id {
 			currProduct = product
 		}
 	}
@@ -80,7 +104,7 @@ func SecKillProduct(c *gin.Context) {
 	}
 
 	message := models.Message{
-		ProductID: currProduct.ProductID,
+		ProductID: int(currProduct.ID),
 		RequestID: request_id.String(),
 	}
 	jsonMessage, _ := json.Marshal(message)
@@ -88,6 +112,26 @@ func SecKillProduct(c *gin.Context) {
 	dto.APIResponse(c, err, request_id.String()+"正在排队中")
 	cache.Rdb.Set("status/"+request_id.String(), "1", time.Hour)
 	return
+}
+
+func checkTime(productID int, secKillList []models.SecKill) bool {
+	currTime := time.Now()
+	var currSecKill models.SecKill
+	for _, secKill := range secKillList {
+		if int(secKill.ProductID) == productID {
+			currSecKill = secKill
+		}
+	}
+
+	log.Println(currTime)
+	log.Println(currSecKill.StartTime)
+	log.Println(currSecKill.EndTime)
+	log.Println(currTime.After(currSecKill.StartTime) && currTime.Before(currSecKill.EndTime))
+	if currTime.After(currSecKill.StartTime) && currTime.Before(currSecKill.EndTime) {
+		return true
+	}
+
+	return false
 }
 
 // 秒杀后进行支付
@@ -107,7 +151,7 @@ func PayForProduct(c *gin.Context) {
 	id, err := strconv.Atoi(productId)
 	var currProduct models.Product
 	for _, product := range productList {
-		if product.ProductID == id {
+		if int(product.ID) == id {
 			currProduct = product
 		}
 	}
@@ -140,7 +184,7 @@ func GetStatus(c *gin.Context) {
 		dto.APIResponse(c, nil, "秒杀排队中")
 		break
 	case 2:
-		dto.APIResponse(c, nil, "已锁定，等待支付")
+		dto.APIResponse(c, nil, "已抢到，等待支付")
 		break
 	case 3:
 		dto.APIResponse(c, nil, "已支付")

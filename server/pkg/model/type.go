@@ -22,24 +22,23 @@ type Message struct {
 
 type Product struct {
 	gorm.Model
-	ProductID     int    `gorm:"int:varchar(30);not null;comment:'产品id'"`
 	ProductName   string `gorm:"type:varchar(100);not null;comment:'产品名'"`
 	ProductNumber int    `gorm:"int:varchar(100);not null;comment:'产品数目'"`
 }
 
 type Order struct {
 	gorm.Model
-	OrderID   int       `gorm:"int:varchar(30);not null;comment:'orderid'"`
 	OrderTime time.Time `json:"order_time" gorm:"column:order_time"`
 	RequestID string
 	Payment   bool
-	Product   Product `json:",omitempty" gorm:"foreignKey:ProductID"`
+	ProductID uint
+	Product   Product `json:",omitempty" gorm:"foreignKey:ProductID;OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
 type SecKill struct {
 	gorm.Model
-	Product   Product   `json:",omitempty" gorm:"foreignKey:ProductID"`
-	SecKillID int       `gorm:"int:varchar(30);not null;comment:'秒杀活动id'"`
+	ProductID uint
+	Product   Product   `json:",omitempty" gorm:"foreignKey:ProductID;OnUpdate:CASCADE,OnDelete:SET NULL"`
 	StartTime time.Time `json:"start_time" gorm:"column:start_time"`
 	EndTime   time.Time `json:"end_time" gorm:"column:end_time"`
 }
@@ -66,17 +65,22 @@ func ListOrder() ([]Order, error) {
 func SolveSecKill(requestID string, ProductID int) {
 	tx := Database.Begin()
 	var product Product
-	tx.Where("ProductID=" + string(ProductID)).First(&product)
+	log.Println(requestID)
+	log.Println(ProductID)
+	Database.Table(ProductTableName).First(&product)
+
 	if product.ProductNumber > 0 {
 		product.ProductNumber = product.ProductNumber - 1
 	}
-	tx.Save(product)
+
+	log.Println(product.ProductNumber)
+	tx.Table(ProductTableName).Save(&product)
 	order := Order{
 		OrderTime: time.Now(),
 		RequestID: requestID,
 		Product:   product,
 	}
-	tx.Save(order)
+	tx.Table(OrderTableName).Save(&order)
 
 	var productList []Product
 	val, err := cache.Rdb.Get("products").Result()
@@ -88,7 +92,7 @@ func SolveSecKill(requestID string, ProductID int) {
 	} else {
 		json.Unmarshal([]byte(val), &productList)
 		for _, p := range productList {
-			if p.ProductID == ProductID {
+			if int(p.ID) == ProductID {
 				p.ProductNumber = p.ProductNumber - 1
 			}
 		}

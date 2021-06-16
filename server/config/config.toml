@@ -1,6 +1,6 @@
 [database]
 Addr = "mysql:3306"
-DB = "sec_skill_db"
+DB = "sec_kill_db"
 Driver = "mysql"
 UserName = "root"
 Password = "jdllq@cclfc"

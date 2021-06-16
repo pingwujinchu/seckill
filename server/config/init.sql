@@ -1,1 +1,1 @@
-create database sec_skill_db;
+create database sec_kill_db;
