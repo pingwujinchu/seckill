@@ -94,8 +94,10 @@ bool DB::exeSQL(string sql)
 
 bool DB::addProduct(Product product)
 {
+    
 }
 
 bool DB::addSecKill(SecKill secKill)
 {
+
 }

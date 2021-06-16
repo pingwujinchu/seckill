@@ -1,6 +1,11 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
-cc_binary(
+go_binary(
     name = "server",
-    srcs = ["server.cc"],
+    srcs = ["server.go"],
+    importpath = "test",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/gin-gonic/gin:go_default_library",
+    ],
 )
