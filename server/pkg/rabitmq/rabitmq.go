@@ -1,6 +1,7 @@
 package RabbitMQ
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"server/pkg/config"
@@ -161,7 +162,10 @@ func (r *RabbitMQ) ConsumeSimple() {
 	// 启用协和处理消息
 	go func() {
 		for d := range msgs {
-			models.SolveSecKill(string(d.Body), 1)
+			var message models.Message
+			json.Unmarshal(d.Body, &message)
+			log.Panicln("consume message: ", message)
+			models.SolveSecKill(message.RequestID, message.ProductID)
 			log.Printf("Received a message: %s", d.Body)
 			fmt.Println(d.Body)
 		}

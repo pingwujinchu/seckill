@@ -78,7 +78,13 @@ func SecKillProduct(c *gin.Context) {
 		dto.APIResponse(c, e, "商品已经卖完")
 		return
 	}
-	RabbitMQ.SecKillRabbitmq.PublishSimple(request_id.String())
+
+	message := models.Message{
+		ProductID: currProduct.ProductID,
+		RequestID: request_id.String(),
+	}
+	jsonMessage, _ := json.Marshal(message)
+	RabbitMQ.SecKillRabbitmq.PublishSimple(string(jsonMessage))
 	dto.APIResponse(c, err, request_id.String()+"正在排队中")
 	cache.Rdb.Set("status/"+request_id.String(), "1", time.Hour)
 	return

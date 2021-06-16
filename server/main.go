@@ -14,9 +14,9 @@ func main() {
 	println("rabbit")
 	RabbitMQ.InitRabbitMQ()
 	server := routers.InitRouter()
+	go RabbitMQ.SecKillRabbitmq.ConsumeSimple()
 	err := server.Engine.Run(":8080")
 	if err != nil {
 		log.Fatal("start failed")
 	}
-	RabbitMQ.SecKillRabbitmq.ConsumeSimple()
 }

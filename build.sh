@@ -8,7 +8,7 @@ docker run \
   -w /src/workspace \
   l.gcr.io/google/bazel:latest \
   --output_user_root=/tmp/build_output \
-  build //client:client
+  build //client:client --linkopt="-pthread" 
 
 cd server
 docker build -t sec-kill-server:dev .

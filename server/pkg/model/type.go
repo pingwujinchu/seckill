@@ -15,6 +15,11 @@ const (
 	OrderTableName   = "orders"
 )
 
+type Message struct {
+	ProductID int
+	RequestID string
+}
+
 type Product struct {
 	gorm.Model
 	ProductID     int    `gorm:"int:varchar(30);not null;comment:'产品id'"`

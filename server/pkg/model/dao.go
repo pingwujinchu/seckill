@@ -70,11 +70,31 @@ func mysqlDatabase(dbConfig config.DatabaseConfig) {
 
 	//3 Migration db
 	migration()
-	produt := Product{
-		ProductName:   "小米11",
-		ProductNumber: 50,
+	var currProduct Product
+	var productList []Product
+	res := Database.Table(ProductTableName).Where("deleted_at is null ").Find(&productList)
+	if res.Error != nil || len(productList) == 0 {
+		produt := Product{
+			ProductName:   "小米11",
+			ProductNumber: 50,
+		}
+		Database.Table(ProductTableName).Save(&produt)
+		currProduct = produt
+	} else {
+		Database.Table(ProductTableName).First(&currProduct)
 	}
-	Database.Table(ProductTableName).Save(&produt)
+
+	var secKillList []SecKill
+	res = Database.Table(SecKillTableName).Where("deleted_at is null ").Find(&secKillList)
+	h, _ := time.ParseDuration("1h")
+	if res.Error != nil || len(secKillList) == 0 {
+		seckill := SecKill{
+			Product:   currProduct,
+			StartTime: time.Now(),
+			EndTime:   time.Now().Add(h),
+		}
+		Database.Table(SecKillTableName).Save(&seckill)
+	}
 }
 
 func migration() {
