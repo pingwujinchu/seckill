@@ -55,4 +55,16 @@ sudo ./build.sh
 ```
 
 # 运行
+```
 docker-compose up
+```
+客户端查看秒杀产品
+```
+./client  -s product
+```
+客户端发起秒杀
+```
+./client -s seckill -a 1 -n 10
+```
+其中-n 指的是并行数
+
