@@ -169,4 +169,6 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 # 演示视频
 [![Watch the video](https://img.youtube.com/vi/T-D1KVIuvjA/maxresdefault.jpg)](/docs/png/example.mp4)
+<video src="./test.mp4" width="800px" height="600px" controls="controls"></video>
+
 
