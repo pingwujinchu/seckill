@@ -77,6 +77,7 @@ sudo ./build.sh
 ```
 docker-compose up
 ```
+![Portal](/docs/png/startup.png)
 客户端查看秒杀产品
 ```
 ./client  -s product

@@ -42,7 +42,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: jdllq@cclfc
       MYSQL_DATABASE: sec_skill_db
-      MYSQL_USER: root
     volumes:
     - ./config:/docker-entrypoint-initdb.d
     healthcheck:
