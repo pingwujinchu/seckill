@@ -8,7 +8,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN export CGO_ENABLED=0 && export GOSUMDB=off && go build -mod=vendor -a -v -o main .
+RUN export CGO_ENABLED=0 && export GOSUMDB=off && go build -mod=vendor -a -v -o main
 
 EXPOSE 8080
 

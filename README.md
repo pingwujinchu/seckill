@@ -81,16 +81,21 @@ docker-compose up
 ```
 ./client  -s product
 ```
+![Portal](/docs/png/product.png)
+
 客户端发起秒杀
 ```
 ./client -s seckill -a 1 -n 10
 ```
+![Portal](/docs/png/seckill.png)
+
 其中-n 指的是并行数
 
 查看当前状态
 ```
 ./client -s status -a xxxxxx 
 ```
+
 
 # 数据库设计
 
