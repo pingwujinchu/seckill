@@ -2,42 +2,61 @@
 该项目使用bazel进行打包管理
 # 项目目录
 ```sh
-├── [  67]  build.sh
-├── [4.0K]  cache
-│   ├── [ 14K]  cache
-│   ├── [ 350]  cache.cpp
-│   └── [ 939]  redis.h
-├── [4.0K]  client
-│   ├── [ 151]  BUILD
-│   └── [1.7K]  main.cc
-├── [4.0K]  db
-│   ├── [2.7K]  db.cpp
-│   ├── [ 865]  db.h
-│   ├── [ 667]  entity.cpp
-│   ├── [ 799]  entity.h
-│   ├── [ 803]  init.sql
-│   ├── [ 28K]  test
-│   └── [1.4K]  test.cpp
-├── [   0]  Dockerfile
-├── [1.0K]  LICENSE
-├── [  63]  README.md
-├── [4.0K]  server
-│   ├── [ 263]  BUILD
-│   ├── [   0]  Dockerfile
-│   ├── [ 151]  go.mod
-│   ├── [6.3K]  go.sum
-│   ├── [ 204]  main.go
-│   └── [4.0K]  pkg
-│       ├── [4.0K]  cache
-│       ├── [4.0K]  dao
-│       │   └── [1.6K]  dao.go
-│       ├── [4.0K]  entity
-│       │   └── [ 379]  type.go
-│       └── [4.0K]  kafka
-├── [4.0K]  tools
-│   ├── [ 165]  BUILD
-│   └── [ 18K]  cmdline.h
-└── [ 592]  WORKSPACE
+├── build.sh
+├── cache
+│   ├── cache
+│   ├── cache.cpp
+│   └── redis.h
+├── client
+│   ├── BUILD
+│   └── main.cc
+├── db
+│   ├── db.cpp
+│   ├── db.h
+│   ├── entity.cpp
+│   ├── entity.h
+│   ├── init.sql
+│   ├── test
+│   └── test.cpp
+├── Dockerfile
+├── LICENSE
+├── png
+├── README.md
+├── server
+│   ├── BUILD
+│   ├── config
+│   │   ├── config.toml
+│   │   └── init.sql
+│   ├── docker-compose.yml
+│   ├── Dockerfile
+│   ├── go.mod
+│   ├── go.sum
+│   ├── main.go
+│   ├── pkg
+│   │   ├── cache
+│   │   │   └── redis.go
+│   │   ├── config
+│   │   │   └── config.go
+│   │   ├── controller
+│   │   │   ├── api
+│   │   │   │   └── products.go
+│   │   │   ├── base.go
+│   │   │   └── dto
+│   │   │       ├── code.go
+│   │   │       └── response.go
+│   │   ├── model
+│   │   │   ├── dao.go
+│   │   │   └── type.go
+│   │   ├── rabitmq
+│   │   │   └── rabitmq.go
+│   │   └── router
+│   │       └── router.go
+│   ├── readme.txt
+│   └── sec_kill_db
+├── tools
+│   ├── BUILD
+│   └── cmdline.h
+└── WORKSPACE
 ```
 
 # client
@@ -85,6 +104,38 @@ docker-compose up
 +-----------------------+
 ```
 
+# 服务端设计
+服务端使用go语言的gin框架，主要分为如下模块：
+
+## 秒杀产品管理
+秒杀产品存在数据库sec_kills中，主要保存秒杀的产品，及秒杀开始时间及结束时间。
+会在项目启动时，将其加载到redis缓存中。这个数据也是读多写少的数据。
+## 库存查询
+```
+因为库存数据是查询多于修改，因此将库存数据放到缓存中
+```
+## 秒杀任务提交
+```
+通过缓存数据验证秒杀请求合法后，将秒杀请求传递到rabbitmq队列中。
+```
+## 库存锁定
+```
+队列消费者从队列拿到请求后，将会基于乐观锁去获取库存，如果库存>0, 则使用数据库事务修改库存，并生成order记录。并同步更新缓存。
+```
+
+## 支付管理
+```
+
+```
+## 缓存同步
+```
+```
+
+## 安全性保证
+```
+服务端提供的接口经过加密，客户端和服务端之间通信使用认证信息进行认证。
+```
+
 # 问题排查
 如果遇到无法连接数据库，是没有创建数据库，需要创建一下数据库，命令如下：
 ```
@@ -93,5 +144,12 @@ docker exec -it  XXX sh
 mysql -u root -p jdllq@cclfc
 
 create database sec_kill_db
+```
+
+如果docker-compose无法启动， 请安装最新版docker-compose， 安装地址如下：
+```
+sudo curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
 
