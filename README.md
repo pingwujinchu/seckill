@@ -78,6 +78,8 @@ sudo ./build.sh
 docker-compose up
 ```
 ![Portal](/docs/png/startup.png)
+
+![Portal](/docs/png/log.png)
 客户端查看秒杀产品
 ```
 ./client  -s product
@@ -90,13 +92,16 @@ docker-compose up
 ```
 ![Portal](/docs/png/seckill.png)
 
+更新秒杀时间后
+![Portal](/docs/png/kill.png)
+
 其中-n 指的是并行数
 
 查看当前状态
 ```
 ./client -s status -a xxxxxx 
 ```
-
+![Portal](/docs/png/pay.png)
 
 # 数据库设计
 
