@@ -167,3 +167,6 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
 
+# 演示视频
+![Portal](/docs/png/example.mp4)
+

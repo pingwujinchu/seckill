@@ -86,22 +86,10 @@ func SolveSecKill(requestID string, ProductID int) {
 	tx.Table(OrderTableName).Save(&order)
 
 	var productList []Product
-	val, err := cache.Rdb.Get("products").Result()
-	if err != nil {
-		productList, err = ListProducts()
-		log.Println("List product Test Success.")
-		productJson, _ := json.Marshal(productList)
-		cache.Rdb.Set("products", productJson, time.Hour)
-	} else {
-		json.Unmarshal([]byte(val), &productList)
-		for _, p := range productList {
-			if int(p.ID) == ProductID {
-				p.ProductNumber = p.ProductNumber - 1
-			}
-		}
-		productJson, _ := json.Marshal(productList)
-		cache.Rdb.Set("products", productJson, time.Hour)
-	}
+	productList, _ = ListProducts()
+	log.Println("List product Test Success.")
+	productJson, _ := json.Marshal(productList)
+	cache.Rdb.Set("products", productJson, time.Hour)
 	cache.Rdb.Set("status/"+requestID, "2", time.Hour)
 	tx.Commit()
 }
